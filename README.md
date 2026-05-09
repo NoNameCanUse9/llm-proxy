@@ -40,6 +40,12 @@ docker run -d \
    ./bin/llm-proxy
    ```
 
+> [!IMPORTANT]
+> **首次运行注意事项**:
+> 程序在第一次启动时会自动创建管理员账号 `admin`，并随机生成一个初始密码。请务必 **查看容器日志或控制台输出** 来获取该密码。
+>
+> Docker 用户查看密码命令: `docker logs llm-proxy`
+
 ## 🔐 安全建议 (重要!)
 
 > [!CAUTION]
