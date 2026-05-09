@@ -24,6 +24,7 @@ RUN apk add --no-cache ca-certificates tzdata
 RUN mkdir -p data
 
 COPY --from=backend-builder /app/llm-proxy .
+RUN chmod +x llm-proxy
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 EXPOSE 8080
