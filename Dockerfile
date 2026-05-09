@@ -1,34 +1,30 @@
-# Build stage
-FROM golang:1.26-alpine AS builder
+# Stage 1: Build Frontend
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
+# Stage 2: Build Backend
+FROM golang:1.26-alpine AS backend-builder
 WORKDIR /app
-
-# Install build dependencies
 RUN apk add --no-cache gcc musl-dev
-
-# Copy go mod files
 COPY go.mod go.sum ./
 RUN go mod download
-
-# Copy source code
 COPY . .
+# We don't need to copy the frontend dist here because we copy it in the final stage
+RUN CGO_ENABLED=0 go build -o llm-proxy ./cmd/server/main.go
 
-# Build with CGO disabled (since we use pure go sqlite driver)
-RUN CGO_ENABLED=0 GOOS=linux go build -o llm-proxy ./cmd/server/main.go
-
-# Final stage
+# Stage 3: Final Image
 FROM alpine:latest
-
 WORKDIR /app
-
 RUN apk add --no-cache ca-certificates tzdata
-
-COPY --from=builder /app/llm-proxy .
-COPY --from=builder /app/configs/config.example.toml ./config.example.toml
-
 # Create data directory
 RUN mkdir -p data
 
-EXPOSE 8080
+COPY --from=backend-builder /app/llm-proxy .
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
+EXPOSE 8080
 CMD ["./llm-proxy"]

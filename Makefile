@@ -1,8 +1,11 @@
-.PHONY: build run test clean docker-build
+.PHONY: build run test clean docker-build doc
 
 BINARY_NAME=llm-proxy
 
-build:
+build-frontend:
+	cd frontend && npm install && npm run build
+
+build: build-frontend
 	go build -o bin/$(BINARY_NAME) ./cmd/server/main.go
 
 run: build
@@ -22,7 +25,10 @@ test:
 
 clean:
 	rm -rf bin/
-	rm -f data/llm-proxy.db
+	rm -f data/data.db
 
 docker-build:
 	docker build -t $(BINARY_NAME) .
+
+doc:
+	go run github.com/swaggo/swag/cmd/swag@latest init -g cmd/server/main.go --parseDependency --parseInternal

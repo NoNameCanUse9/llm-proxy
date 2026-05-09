@@ -68,7 +68,7 @@ const searchSuggestions = computed(() => {
     // Match models
     if (channel.allowed_models) {
       const models = channel.allowed_models.split(',')
-      models.forEach(m => {
+      models.forEach((m: string) => {
         if (m.trim().toLowerCase().includes(q)) {
           suggestions.push({ type: 'model', text: m.trim(), channelId: channel.id, channelName: channel.name })
         }
@@ -151,7 +151,7 @@ const { copy: copyToClipboard, copied: isCopied } = useAppClipboard()
 const handleSave = async () => {
   isSaving.value = true
   try {
-    const data = { ...form.value }
+    const data: any = { ...form.value }
     delete data.api_key_input // Clean up frontend-only field
     if (form.value.api_key_input) {
       // Split by newline or space, filter out empty strings
@@ -302,7 +302,7 @@ const handleDelete = async (id: number) => {
                 <template v-if="searchQuery">
                   <!-- Highlighted matching models first -->
                   <span 
-                    v-for="m in channel.allowed_models?.split(',').filter(m => m.trim().toLowerCase().includes(searchQuery.toLowerCase()))" 
+                    v-for="m in channel.allowed_models?.split(',').filter((m: string) => m.trim().toLowerCase().includes(searchQuery.toLowerCase()))" 
                     :key="'match-' + m" 
                     @click="copyToClipboard(channel.name + '/' + m.trim())"
                     class="px-1.5 py-0.5 rounded border border-cyan-500/30 bg-cyan-500/10 text-[9px] text-cyan-400 whitespace-nowrap shadow-[0_0_8px_rgba(6,182,212,0.2)] cursor-pointer hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all active:scale-95"
@@ -312,7 +312,7 @@ const handleDelete = async (id: number) => {
                   </span>
                   <!-- Other models (if search is partial) -->
                   <span 
-                    v-for="m in channel.allowed_models?.split(',').filter(m => !m.trim().toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)" 
+                    v-for="m in channel.allowed_models?.split(',').filter((m: string) => !m.trim().toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)" 
                     :key="'other-' + m" 
                     @click="copyToClipboard(channel.name + '/' + m.trim())"
                     class="px-1.5 py-0.5 rounded border border-white/5 bg-white/5 text-[9px] text-zinc-500 whitespace-nowrap opacity-50 cursor-pointer hover:opacity-100 hover:bg-white/10 transition-all active:scale-95"

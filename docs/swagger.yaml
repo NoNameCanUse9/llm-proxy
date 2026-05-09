@@ -1,0 +1,504 @@
+basePath: /
+definitions:
+  github_com_choken_llm-proxy_internal_database.APIKey:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      key_value:
+        type: string
+      last_used_at:
+        type: string
+      provider_id:
+        type: integer
+      request_count:
+        type: integer
+      status:
+        description: active, disabled
+        type: string
+      total_tokens:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_database.AccessToken:
+    properties:
+      allowed_channels:
+        description: Comma separated IDs
+        type: string
+      allowed_ips:
+        description: Comma separated IPs/CIDRs
+        type: string
+      allowed_models:
+        description: Comma separated models
+        type: string
+      created_at:
+        type: string
+      denied_ips:
+        description: Comma separated IPs/CIDRs
+        type: string
+      denied_models:
+        description: Comma separated models
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      rpm:
+        description: Requests per minute
+        type: integer
+      token:
+        description: Plain text token for retrieval
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_database.Channel:
+    properties:
+      allowed_models:
+        description: comma separated
+        type: string
+      api_keys:
+        items:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_database.APIKey'
+        type: array
+      base_url:
+        type: string
+      created_at:
+        type: string
+      denied_models:
+        description: comma separated
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      rpm:
+        type: integer
+      type:
+        description: openai, anthropic, gemini
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_database.RequestLog:
+    properties:
+      access_token_id:
+        type: integer
+      channel_id:
+        type: integer
+      completion_tokens:
+        type: integer
+      created_at:
+        description: Fixed to match frontend
+        type: string
+      error_message:
+        type: string
+      id:
+        type: integer
+      ip_address:
+        description: Fixed to match frontend
+        type: string
+      key_hint:
+        type: string
+      latency_ms:
+        type: integer
+      model:
+        type: string
+      prompt_tokens:
+        type: integer
+      provider:
+        type: string
+      request_id:
+        type: string
+      status_code:
+        type: integer
+      total_tokens:
+        type: integer
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.AnthropicMessage:
+    properties:
+      content:
+        type: string
+      role:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.AnthropicRequest:
+    properties:
+      max_tokens:
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.AnthropicMessage'
+        type: array
+      model:
+        type: string
+      stream:
+        type: boolean
+      system:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.ChatCompletionChoice:
+    properties:
+      finish_reason:
+        type: string
+      index:
+        type: integer
+      message:
+        $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.ChatMessage'
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.ChatCompletionRequest:
+    properties:
+      max_tokens:
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.ChatMessage'
+        type: array
+      model:
+        type: string
+      stream:
+        type: boolean
+      temperature:
+        type: number
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.ChatCompletionResponse:
+    properties:
+      choices:
+        items:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.ChatCompletionChoice'
+        type: array
+      created:
+        type: integer
+      id:
+        type: string
+      model:
+        type: string
+      object:
+        type: string
+      usage:
+        $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.Usage'
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.ChatMessage:
+    properties:
+      content:
+        type: string
+      role:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.GeminiContent:
+    properties:
+      parts:
+        items:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.GeminiPart'
+        type: array
+      role:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.GeminiPart:
+    properties:
+      text:
+        type: string
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.GeminiRequest:
+    properties:
+      contents:
+        items:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.GeminiContent'
+        type: array
+      system_instruction:
+        $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.GeminiContent'
+    type: object
+  github_com_choken_llm-proxy_internal_proxy.Usage:
+    properties:
+      completion_tokens:
+        type: integer
+      prompt_tokens:
+        type: integer
+      total_tokens:
+        type: integer
+    type: object
+  internal_api.ChannelRequest:
+    properties:
+      allowed_models:
+        type: string
+      api_keys:
+        items:
+          type: string
+        type: array
+      base_url:
+        type: string
+      denied_models:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      rpm:
+        type: integer
+      type:
+        type: string
+    type: object
+  internal_api.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: A high-performance LLM API Proxy aggregator.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: LLM Proxy API
+  version: "1.0"
+paths:
+  /admin/channels:
+    get:
+      description: Retrieve a list of all configured upstream channels.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_choken_llm-proxy_internal_database.Channel'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: List Channels
+      tags:
+      - Admin API
+    post:
+      consumes:
+      - application/json
+      description: Create a new upstream channel with API keys and model policies.
+      parameters:
+      - description: Channel Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.ChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_choken_llm-proxy_internal_database.Channel'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Channel
+      tags:
+      - Admin API
+  /admin/logs:
+    get:
+      description: Retrieve request logs with optional filtering.
+      parameters:
+      - description: Filter by model name
+        in: query
+        name: model
+        type: string
+      - description: Filter by provider
+        in: query
+        name: provider
+        type: string
+      - description: Filter by status code
+        in: query
+        name: status_code
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_choken_llm-proxy_internal_database.RequestLog'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: List Logs
+      tags:
+      - Admin API
+  /admin/tokens:
+    get:
+      description: Retrieve a list of all client access tokens (sk-xxx).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_choken_llm-proxy_internal_database.AccessToken'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: List Access Tokens
+      tags:
+      - Admin API
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with username and password to receive a JWT token.
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Admin Login
+      tags:
+      - Admin API
+  /v1/chat/completions:
+    post:
+      consumes:
+      - application/json
+      description: Send a chat completion request in OpenAI format.
+      parameters:
+      - description: Chat Completion Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.ChatCompletionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.ChatCompletionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Chat Completion (OpenAI)
+      tags:
+      - Client API
+  /v1/messages:
+    post:
+      consumes:
+      - application/json
+      description: Send a message request in Anthropic format.
+      parameters:
+      - description: Anthropic Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.AnthropicRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Messages (Anthropic)
+      tags:
+      - Client API
+  /v1/models:
+    get:
+      description: Returns a list of models allowed for the current access token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List Models
+      tags:
+      - Client API
+  /v1/models/{model_action}:
+    post:
+      consumes:
+      - application/json
+      description: Send a request in Gemini format.
+      parameters:
+      - description: Model and Action (e.g. gemini-pro:generateContent)
+        in: path
+        name: model_action
+        required: true
+        type: string
+      - description: Gemini Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.GeminiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_choken_llm-proxy_internal_proxy.ChatCompletionResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Generate Content (Gemini)
+      tags:
+      - Client API
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -12,6 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleChatCompletion handles OpenAI-compatible chat completions
+// @Summary Chat Completion (OpenAI)
+// @Description Send a chat completion request in OpenAI format.
+// @Tags Client API
+// @Accept json
+// @Produce json
+// @Param request body proxy.ChatCompletionRequest true "Chat Completion Request"
+// @Success 200 {object} proxy.ChatCompletionResponse
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Router /v1/chat/completions [post]
+// @Security ApiKeyAuth
 func (s *Server) HandleChatCompletion(c *gin.Context) {
 	if database.GetConfig("enable_openai") != "true" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "OpenAI endpoint is disabled by administrator"})
@@ -25,6 +37,17 @@ func (s *Server) HandleChatCompletion(c *gin.Context) {
 	s.executeRequest(c, &req, "openai")
 }
 
+// HandleAnthropicMessages handles Anthropic-compatible messages
+// @Summary Messages (Anthropic)
+// @Description Send a message request in Anthropic format.
+// @Tags Client API
+// @Accept json
+// @Produce json
+// @Param request body proxy.AnthropicRequest true "Anthropic Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /v1/messages [post]
+// @Security ApiKeyAuth
 func (s *Server) HandleAnthropicMessages(c *gin.Context) {
 	if database.GetConfig("enable_anthropic") != "true" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Anthropic endpoint is disabled by administrator"})
@@ -39,6 +62,17 @@ func (s *Server) HandleAnthropicMessages(c *gin.Context) {
 	s.executeRequest(c, req, "anthropic")
 }
 
+// HandleGeminiGenerateContent handles Gemini-compatible content generation
+// @Summary Generate Content (Gemini)
+// @Description Send a request in Gemini format.
+// @Tags Client API
+// @Accept json
+// @Produce json
+// @Param model_action path string true "Model and Action (e.g. gemini-pro:generateContent)"
+// @Param request body proxy.GeminiRequest true "Gemini Request"
+// @Success 200 {object} proxy.ChatCompletionResponse
+// @Router /v1/models/{model_action} [post]
+// @Security ApiKeyAuth
 func (s *Server) HandleGeminiGenerateContent(c *gin.Context) {
 	if database.GetConfig("enable_gemini") != "true" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Gemini endpoint is disabled by administrator"})

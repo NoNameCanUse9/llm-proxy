@@ -17,7 +17,7 @@ func LoadConfig(configPath string) {
 	// 1. Set Defaults
 	GlobalConfig = Config{
 		Port:     8080,
-		DBPath:   "data/llm-proxy.db",
+		DBPath:   "/app/data/data.db",
 		LogLevel: "info",
 	}
 

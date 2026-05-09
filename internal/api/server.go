@@ -3,6 +3,9 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -11,6 +14,10 @@ import (
 	"github.com/choken/llm-proxy/internal/middleware"
 	"github.com/choken/llm-proxy/internal/proxy"
 	"github.com/gin-gonic/gin"
+
+	_ "github.com/choken/llm-proxy/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -41,16 +48,19 @@ func (s *Server) Start() error {
 	r.Use(middleware.LoggerMiddleware())
 	r.Use(NoCacheMiddleware())
 
-	// Static files for Admin UI
-	r.Static("/static", "./internal/api/static")
-	r.LoadHTMLGlob("./internal/api/static/*.html")
+	// Static files for Frontend
+	r.Static("/assets", "./frontend/dist/assets")
+	r.StaticFile("/favicon.ico", "./frontend/dist/favicon.ico")
+	
+	// Root route serves index.html
 	r.GET("/", func(c *gin.Context) {
-		c.File("./internal/api/static/index.html")
+		c.File("./frontend/dist/index.html")
 	})
 
 	// Public routes
 	r.POST("/auth/login", s.HandleAdminLogin)
 	r.GET("/status", s.HandleStatus)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Admin routes (JWT)
 	admin := r.Group("/admin")
@@ -93,11 +103,40 @@ func (s *Server) Start() error {
 		v1.GET("/models", s.HandleListModels)
 	}
 
+	// SPA Support: Catch-all for frontend routes
+	r.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		// If the request starts with API prefixes but wasn't matched, return 404
+		if strings.HasPrefix(path, "/v1") || strings.HasPrefix(path, "/admin") || strings.HasPrefix(path, "/auth") {
+			c.JSON(http.StatusNotFound, gin.H{"error": "API route not found"})
+			return
+		}
+
+		// Development Proxy
+		if os.Getenv("DEV_MODE") == "true" {
+			target, _ := url.Parse("http://localhost:5173")
+			proxy := httputil.NewSingleHostReverseProxy(target)
+			proxy.ServeHTTP(c.Writer, c.Request)
+			return
+		}
+
+		// Otherwise, serve index.html for SPA routing (Production)
+		c.File("./frontend/dist/index.html")
+	})
+
 	addr := fmt.Sprintf(":%d", config.GlobalConfig.Port)
 	fmt.Printf("Server starting on %s\n", addr)
 	return r.Run(addr)
 }
 
+// HandleListModels returns a list of available models for the given access token
+// @Summary List Models
+// @Description Returns a list of models allowed for the current access token.
+// @Tags Client API
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /v1/models [get]
+// @Security ApiKeyAuth
 func (s *Server) HandleListModels(c *gin.Context) {
 	accessToken, exists := c.Get("access_token")
 	if !exists {

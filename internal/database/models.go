@@ -52,6 +52,29 @@ type APIKey struct {
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+func (k *APIKey) BeforeSave(tx *gorm.DB) (err error) {
+	if k.KeyValue != "" {
+		encrypted, err := Encrypt(k.KeyValue)
+		if err != nil {
+			return err
+		}
+		k.KeyValue = encrypted
+	}
+	return nil
+}
+
+func (k *APIKey) AfterFind(tx *gorm.DB) (err error) {
+	if k.KeyValue != "" {
+		decrypted, err := Decrypt(k.KeyValue)
+		if err != nil {
+			// If decryption fails, maybe it's not encrypted (legacy)
+			return nil
+		}
+		k.KeyValue = decrypted
+	}
+	return nil
+}
+
 // AccessToken is a client-facing 'sk-xxx' token
 type AccessToken struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
@@ -69,6 +92,28 @@ type AccessToken struct {
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+func (a *AccessToken) BeforeSave(tx *gorm.DB) (err error) {
+	if a.Token != "" {
+		encrypted, err := Encrypt(a.Token)
+		if err != nil {
+			return err
+		}
+		a.Token = encrypted
+	}
+	return nil
+}
+
+func (a *AccessToken) AfterFind(tx *gorm.DB) (err error) {
+	if a.Token != "" {
+		decrypted, err := Decrypt(a.Token)
+		if err != nil {
+			return nil
+		}
+		a.Token = decrypted
+	}
+	return nil
 }
 
 // Channel represents a simplified LLM upstream (merged Provider + APIKey)

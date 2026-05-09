@@ -19,12 +19,23 @@ import (
 	"github.com/choken/llm-proxy/internal/proxy"
 )
 
-// Auth
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// HandleAdminLogin handles administrator login
+// @Summary Admin Login
+// @Description Login with username and password to receive a JWT token.
+// @Tags Admin API
+// @Accept json
+// @Produce json
+// @Param request body LoginRequest true "Login Request"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/login [post]
 func (s *Server) HandleAdminLogin(c *gin.Context) {
-	var loginReq struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	var loginReq LoginRequest
 
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -58,6 +69,14 @@ func (s *Server) HandleAdminLogin(c *gin.Context) {
 }
 
 // Channels
+// ListChannels returns all configured channels
+// @Summary List Channels
+// @Description Retrieve a list of all configured upstream channels.
+// @Tags Admin API
+// @Produce json
+// @Success 200 {array} database.Channel
+// @Router /admin/channels [get]
+// @Security ApiKeyAuth
 func (s *Server) ListChannels(c *gin.Context) {
 	var channels []database.Channel
 	database.DB.Preload("APIKeys").Find(&channels)
@@ -75,6 +94,16 @@ type ChannelRequest struct {
 	RPM           int      `json:"rpm"`
 }
 
+// CreateChannel creates a new upstream channel
+// @Summary Create Channel
+// @Description Create a new upstream channel with API keys and model policies.
+// @Tags Admin API
+// @Accept json
+// @Produce json
+// @Param request body ChannelRequest true "Channel Request"
+// @Success 201 {object} database.Channel
+// @Router /admin/channels [post]
+// @Security ApiKeyAuth
 func (s *Server) CreateChannel(c *gin.Context) {
 	var req ChannelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -203,6 +232,14 @@ func parseExpiry(s string) *time.Time {
 }
 
 // Access Tokens (sk-xxx)
+// ListAccessTokens returns all client access tokens
+// @Summary List Access Tokens
+// @Description Retrieve a list of all client access tokens (sk-xxx).
+// @Tags Admin API
+// @Produce json
+// @Success 200 {array} database.AccessToken
+// @Router /admin/tokens [get]
+// @Security ApiKeyAuth
 func (s *Server) ListAccessTokens(c *gin.Context) {
 	var tokens []database.AccessToken
 	database.DB.Find(&tokens)
@@ -292,6 +329,17 @@ func (s *Server) DeleteAccessToken(c *gin.Context) {
 }
 
 // Logs
+// ListLogs returns request logs
+// @Summary List Logs
+// @Description Retrieve request logs with optional filtering.
+// @Tags Admin API
+// @Produce json
+// @Param model query string false "Filter by model name"
+// @Param provider query string false "Filter by provider"
+// @Param status_code query int false "Filter by status code"
+// @Success 200 {array} database.RequestLog
+// @Router /admin/logs [get]
+// @Security ApiKeyAuth
 func (s *Server) ListLogs(c *gin.Context) {
 	allLogs := proxy.GlobalLogStore.GetAll()
 	filtered := make([]database.RequestLog, 0)
