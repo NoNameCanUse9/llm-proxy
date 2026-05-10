@@ -1,0 +1,10 @@
+{
+  "model": "deepseek-ai/deepseek-v4-flash",
+  "messages": [{"role":"user","content":"请向我介绍你"}],
+  "max_tokens": 512,
+  "temperature": 1.00,
+  "top_p": 1.00,
+  "frequency_penalty": 0.00,
+  "presence_penalty": 0.00,
+  "stream": false
+}

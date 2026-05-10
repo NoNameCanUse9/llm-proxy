@@ -3,6 +3,8 @@ package proxy
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -16,6 +18,12 @@ func (a *OpenAIAdapter) SendChatCompletion(ctx context.Context, req *ChatComplet
 	if a.BaseURL != "" {
 		config.BaseURL = a.BaseURL
 	}
+
+	// Increase timeout for long-running reasoning models
+	httpClient := &http.Client{
+		Timeout: 5 * time.Minute,
+	}
+	config.HTTPClient = httpClient
 
 	client := openai.NewClientWithConfig(config)
 
@@ -43,8 +51,9 @@ func (a *OpenAIAdapter) SendChatCompletion(ctx context.Context, req *ChatComplet
 		choices[i] = ChatCompletionChoice{
 			Index: c.Index,
 			Message: ChatMessage{
-				Role:    c.Message.Role,
-				Content: c.Message.Content,
+				Role:             c.Message.Role,
+				Content:          c.Message.Content,
+				ReasoningContent: c.Message.ReasoningContent,
 			},
 			FinishReason: string(c.FinishReason),
 		}
@@ -107,8 +116,9 @@ func (a *OpenAIAdapter) StreamChatCompletion(ctx context.Context, req *ChatCompl
 				choices[i] = StreamChoice{
 					Index: c.Index,
 					Delta: ChatDelta{
-						Role:    c.Delta.Role,
-						Content: c.Delta.Content,
+						Role:             c.Delta.Role,
+						Content:          c.Delta.Content,
+						ReasoningContent: c.Delta.ReasoningContent,
 					},
 					FinishReason: string(c.FinishReason),
 				}

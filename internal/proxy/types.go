@@ -6,8 +6,9 @@ import (
 
 // OpenAI compatible types (Internal Standard)
 type ChatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role             string `json:"role"`
+	Content          string `json:"content"`
+	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
 
 type ChatCompletionRequest struct {
@@ -56,8 +57,9 @@ type StreamChoice struct {
 }
 
 type ChatDelta struct {
-	Role    string `json:"role,omitempty"`
-	Content string `json:"content,omitempty"`
+	Role             string `json:"role,omitempty"`
+	Content          string `json:"content,omitempty"`
+	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
 
 type ProviderAdapter interface {
